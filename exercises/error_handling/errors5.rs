@@ -28,7 +28,7 @@ use std::fmt;
 use std::num::ParseIntError;
 
 // TODO: update the return type of `main()` to make this compile.
-fn main() -> Result<(), Box<dyn ???>> {
+fn main() -> Result<(), Box<dyn error::Error>> {
     let pretend_user_input = "42";
     let x: i64 = pretend_user_input.parse()?;
     println!("output={:?}", PositiveNonzeroInteger::new(x)?);
@@ -48,34 +48,13 @@ enum CreationError {
 
 impl PositiveNonzeroInteger {
     fn new(value: i64) -> Result<PositiveNonzeroInteger, CreationError> {
-        // `new` 是一个关联函数，它尝试创建一个新的 `PositiveNonzeroInteger` 实例。
-        // 它接收一个 `i64` 类型的参数 `value`，并返回一个 `Result` 类型。
-        // `Result` 类型可以是 `Ok(PositiveNonzeroInteger)` 或者 `Err(CreationError)`。
-
-        if value <= 0 {
-            // 首先检查 `value` 是否小于或等于零。如果不满足我们的条件（正数且非零），
-            // 则需要返回一个错误。
-
-            if value < 0 {
-                // 如果 `value` 小于零，则说明它是一个负数。
-                // 在这种情况下，我们返回一个 `Err(CreationError::Negative)`，
-                // 表示创建失败的原因是传入了负数。
-                Err(CreationError::Negative)
-            } else {
-                // 如果 `value` 等于零，则说明它不是一个正数。
-                // 我们返回一个 `Err(CreationError::Zero)`，
-                // 表示创建失败的原因是传入了零。
-                Err(CreationError::Zero)
-            }
-        } else {
-            // 如果 `value` 大于零，则它是一个正数且非零，满足我们的条件。
-            // 我们可以安全地将 `value` 强制转换为 `u64` 类型，并创建一个新的 `PositiveNonzeroInteger` 实例。
-            // 然后我们将其包裹在 `Ok` 中返回，表示创建成功。
-            Ok(PositiveNonzeroInteger(value as u64))
+        match value {
+            x if x < 0 => Err(CreationError::Negative),
+            x if x == 0 => Err(CreationError::Zero),
+            x => Ok(PositiveNonzeroInteger(x as u64)),
         }
     }
 }
-
 
 // This is required so that `CreationError` can implement `error::Error`.
 impl fmt::Display for CreationError {
