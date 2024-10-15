@@ -20,7 +20,6 @@
 //
 // No hints this time!
 
-// I AM NOT DONE
 
 pub enum Command {
     Uppercase,
@@ -28,15 +27,23 @@ pub enum Command {
     Append(usize),
 }
 
-mod my_module {
+pub mod my_module{
+    // 使用 super::Command 来引用上级模块中的 Command 枚举
     use super::Command;
-
-    // TODO: Complete the function signature!
-    pub fn transformer(input: ???) -> ??? {
-        // TODO: Complete the output declaration!
-        let mut output: ??? = vec![];
-        for (string, command) in input.iter() {
-            // TODO: Complete the function body. You can do it!
+    pub fn transformer(input: Vec<(String, super::Command)>) -> Vec<String> {
+        let mut output: Vec<String> = vec![];
+        for (string, command) in input {
+            match command {
+                super::Command::Uppercase => output.push(string.to_uppercase()),
+                super::Command::Trim => output.push(string.trim().to_string()),
+                super::Command::Append(times) => {
+                    let mut new_string = string.clone();
+                    for _ in 0..times {
+                        new_string.push_str("bar");
+                    }
+                    output.push(new_string);
+                }
+            }
         }
         output
     }
@@ -44,17 +51,21 @@ mod my_module {
 
 #[cfg(test)]
 mod tests {
-    // TODO: What do we need to import to have `transformer` in scope?
-    use ???;
-    use super::Command;
+    use crate::my_module;
+    // 使用完整的路径引用 transformer 函数和 Command 枚举
+    fn transformer(input: Vec<(String, super::Command)>) -> Vec<String> {
+        my_module::transformer(input)
+    }
+
+    use super::Command; // 仍然需要使用 use 来引用上级模块中的 Command 枚举
 
     #[test]
     fn it_works() {
         let output = transformer(vec![
-            ("hello".into(), Command::Uppercase),
-            (" all roads lead to rome! ".into(), Command::Trim),
-            ("foo".into(), Command::Append(1)),
-            ("bar".into(), Command::Append(5)),
+            ("hello".to_string(), Command::Uppercase),
+            (" all roads lead to rome! ".to_string(), Command::Trim),
+            ("foo".to_string(), Command::Append(1)),
+            ("bar".to_string(), Command::Append(5)),
         ]);
         assert_eq!(output[0], "HELLO");
         assert_eq!(output[1], "all roads lead to rome!");
