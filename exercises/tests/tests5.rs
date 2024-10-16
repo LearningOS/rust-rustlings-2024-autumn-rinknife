@@ -22,17 +22,24 @@
 // Execute `rustlings hint tests5` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
+
+// tests5.rs
 
 /// # Safety
 ///
-/// The `address` must contain a mutable reference to a valid `u32` value.
-unsafe fn modify_by_address(address: usize) {
-    // TODO: Fill your safety notice of the code block below to match your
-    // code's behavior and the contract of this function. You may use the
-    // comment of the test below as your format reference.
+/// The `address` must be a valid pointer to a `u32` value that is mutable.
+/// The caller must ensure that no other references to the same `u32` value exist
+/// for the duration of this function call to prevent data races.
+unsafe fn modify_by_address(address: *mut u32) {
+    // # Safety
+    //
+    // We have received a raw pointer to a `u32` from the caller and have
+    // been promised that it is valid and mutable. We must trust that the
+    // caller has not provided an invalid or immutable pointer.
     unsafe {
-        todo!("Your code goes here")
+        // Dereference the pointer to modify the value it points to.
+        // We assume that the pointer is valid and points to a `u32` value.
+        *address = 0xAABBCCDD;
     }
 }
 
@@ -43,9 +50,10 @@ mod tests {
     #[test]
     fn test_success() {
         let mut t: u32 = 0x12345678;
-        // SAFETY: The address is guaranteed to be valid and contains
-        // a unique reference to a `u32` local variable.
-        unsafe { modify_by_address(&mut t as *mut u32 as usize) };
-        assert!(t == 0xAABBCCDD);
+        // SAFETY: The address is guaranteed to be valid and mutable as it is
+        // a unique reference to a `u32` local variable. There are no other
+        // references to this variable, ensuring exclusive access.
+        unsafe { modify_by_address(&mut t as *mut u32) };
+        assert_eq!(t, 0xAABBCCDD);
     }
 }
