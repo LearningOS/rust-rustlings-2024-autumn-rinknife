@@ -2,7 +2,7 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,15 +69,45 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+	pub fn merge(list_a: LinkedList<T>, list_b: LinkedList<T>) -> Self
+    where
+        T: PartialOrd + Clone, // 需要添加 Clone 约束
+    {
+        let mut list_c = LinkedList::<T>::new();
+        let mut node_a = list_a.start;
+        let mut node_b = list_b.start;
+
+        while node_a.is_some() || node_b.is_some() {
+            match (node_a, node_b) {
+                (Some(node_a_ptr), Some(node_b_ptr)) => {
+                    let node_a_ref = unsafe { node_a_ptr.as_ref() };
+                    let node_b_ref = unsafe { node_b_ptr.as_ref() };
+
+                    if node_a_ref.val <= node_b_ref.val {
+                        list_c.add(node_a_ref.val.clone()); // 克隆值
+                        node_a = node_a_ref.next;
+                    } else {
+                        list_c.add(node_b_ref.val.clone()); // 克隆值
+                        node_b = node_b_ref.next;
+                    }
+                }
+                (Some(node_a_ptr), None) => {
+                    let node_a_ref = unsafe { node_a_ptr.as_ref() };
+                    list_c.add(node_a_ref.val.clone()); // 克隆值
+                    node_a = node_a_ref.next;
+                }
+                (None, Some(node_b_ptr)) => {
+                    let node_b_ref = unsafe { node_b_ptr.as_ref() };
+                    list_c.add(node_b_ref.val.clone()); // 克隆值
+                    node_b = node_b_ref.next;
+                }
+                (None, None) => break,
+            }
         }
-	}
+
+        list_c
+    }
+
 }
 
 impl<T> Display for LinkedList<T>
